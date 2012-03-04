@@ -260,12 +260,11 @@ void pre_shortest_job_first() {
 		
 		//^ This makes perfect sense. Its strictly decreasing - if x is shorter than y and z is shorter than x
 		//then z is shorter than y
-		int next_start_time = INT_MAX; int next_start_idx = 0;
+		int next_start_time = INT_MAX;
 		for (i = 0; i < TOTAL_PROCESSES; i++) {
 			if (QUEUE[i].submit_time > CURRENT_TIME
 			    && QUEUE[i].submit_time < next_start_time) {
 				next_start_time = QUEUE[i].submit_time;
-				next_start_idx = i;
 			}
 		}
 		//Will this job finish before the next job is submitted?
