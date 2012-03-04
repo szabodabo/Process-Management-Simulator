@@ -101,10 +101,9 @@ int random_time_amt() {
 }
 
 /**
- * 25% of the time, give me 0.
- * 75% of the time, give me a number that is random and is
- *   an exponential distrubution between 100 and 2500.
- * See http://tinyurl.com/7edzgff for the distribution function.
+ * Return an exponentially-distributed random number.
+ * Requirements for this function have been changed as of
+ * Friday's lecture; see the project instructions for details.
  */
 int expo_random() {
 	double base_rand = (double) rand() / (double) RAND_MAX;
@@ -113,11 +112,12 @@ int expo_random() {
 	} else {
 		//Shameless variable re-use here
 		base_rand = (double) rand() / (double) RAND_MAX;
-		//Distribution of domain will be 0 to 2
-		base_rand = base_rand * 2;
-
-		double raw_random = 1 - exp10(-1.0 * base_rand);
-		return  (int)(raw_random * (2500-100)) + 100;
+		int x = 9001;
+		double lambda = 0.001;
+		while (x > 8000) {
+			x = -1 * (log(base_rand) / lambda);
+		}
+		return x;
 	}
 }
 
