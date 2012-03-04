@@ -49,6 +49,7 @@ int TOTAL_PROCESSES = 20; //This is the N value
 int PART = 1; //Part I or Part II
 int WAITING_PROCESSES = 0; //How many processes still have not finished?
 int CONTEXT_SWITCH_PENALTY = 12; //This is "Tcs"
+int PERFORMED_CONTEXT_SWITCH = NO; //We should only incur the CS penalty after the first switch
 //===========END data structures/global variables==========
 
 //=======START function declaration========================
@@ -373,7 +374,11 @@ void process_start(int q_idx) {
  * new_idx: The index in the queue of the replacing process
  */
 void process_context_switch(int *cur_idx, int new_idx) {
-	if (WAITING_PROCESSES != TOTAL_PROCESSES) { //This isn't the first process
+	//If the first process is preempted before it finishes, we should still
+	// do a context switch; the problem is that we don't decrement
+	// WAITING_PROCESSES until a process FINISHES.
+	// I guess, for now, we'll use a flag to tell us if we've done a CS before.
+	if (PERFORMED_CONTEXT_SWITCH == YES) {
 		if (*cur_idx == new_idx) { //No switch necessary
 			return;
 		}
@@ -385,6 +390,7 @@ void process_context_switch(int *cur_idx, int new_idx) {
 		increment_clock(CONTEXT_SWITCH_PENALTY);
 	}
 	*cur_idx = new_idx;
+	PERFORMED_CONTEXT_SWITCH = YES;
 }
 
 
