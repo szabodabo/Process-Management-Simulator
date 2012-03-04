@@ -6,70 +6,21 @@
 #include <math.h>
 #include <string.h>
 #include <limits.h>
-
-//=======START constants===================================
-#define FIRST_COME_FIRST_SERVED 1
-#define SHORTEST_JOB_FIRST 2
-#define PRE_SHORTEST_JOB_FIRST 3
-#define ROUND_ROBIN 4
-#define PRE_PRIORITY 5
-
-#define JOB_NOT_STARTED 0
-#define JOB_IN_PROGRESS 1
-#define JOB_COMPLETED 2
-
-#define YES 1
-#define NO 0
-//=======END constants=====================================
-
-//=========START data structures/global variables==========
-typedef struct {
-	int pid;
-	int time_required;
-	int priority; //Not used for all algorithms
-	int submit_time; //Either 0 or delayed start
-	int start_time;  //Set to -1 initially
-	int end_time; //Set to -1 initially
-	int time_spent; //Amount of time spent so far
-	int status; //Constants define this one
-} Job;
-
-typedef struct {
-	int turnaround_time;
-	int initial_wait_time;
-	int total_wait_time;
-} JobStatCollection;
+#include <constants.h>
+#include <structs.h>
+#include <functions.h>
 
 //All times are in MILLISECONDS (as integers... so 10 = 10ms)
-int SCHEDULING_METHOD = PRE_SHORTEST_JOB_FIRST;
+
+//We'll need to keep track of the jobs in the queue
+//as well as their statistics
 Job *QUEUE;
 JobStatCollection *ALL_STATS;
-int CURRENT_TIME = 0; //Time to get a watch... heh. SIGH -nz
-int TOTAL_PROCESSES = 20; //This is the N value
-int PART = 1; //Part I or Part II
-int WAITING_PROCESSES = 0; //How many processes still have not finished?
-int CONTEXT_SWITCH_PENALTY = 12; //This is "Tcs"
-int PERFORMED_CONTEXT_SWITCH = NO; //We should only incur the CS penalty after the first switch
-//===========END data structures/global variables==========
 
-//=======START function declaration========================
-void first_come_first_served();
-void shortest_job_first();
-void pre_shortest_job_first();
-void round_robin();
-void pre_priority();
-void populate_queue();
-void run_cpu_sim();
-JobStatCollection get_stats(Job *);
-void print_all_stats();
-void process_submission(int);
-void process_start(int);
-void process_context_switch(int *, int);
-void process_complete(int);
-void process_stats(int);
-void set_clock_to(int);
-void increment_clock(int);
-//=======END function declaration==========================
+//We'll also need some state variables for this simulation
+int CURRENT_TIME = 0; //Time to get a watch... heh. SIGH -nz
+int WAITING_PROCESSES = 0; //How many processes still have not finished?
+int PERFORMED_CONTEXT_SWITCH = NO; //We should only incur the CS penalty after the first switch
 
 /**
  * Main function... coordinate the start of the program

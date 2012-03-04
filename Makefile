@@ -1,2 +1,2 @@
 all:
-	gcc -Wall -g -o sim sim.c -lm
+	gcc -Wall -I. -g -o sim sim.c -lm
