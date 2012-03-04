@@ -104,6 +104,8 @@ int random_time_amt() {
  * Return an exponentially-distributed random number.
  * Requirements for this function have been changed as of
  * Friday's lecture; see the project instructions for details.
+ *
+ * This function returns an expo-dist-rand in [0, 8000).
  */
 int expo_random() {
 	double base_rand = (double) rand() / (double) RAND_MAX;
@@ -171,9 +173,6 @@ void run_cpu_sim() {
 
 /**
  * First-come, first-served.  Pretty simple.
- * We might want to take the trash I'm about to write for this function
- * and separate it out into helper functions / more globals.
- * Cleaned up... wow, you should have seen it before.
  */
 void first_come_first_served() {
 	int current_proc_idx; //Index of current job object in queue (NOT PID)
@@ -204,6 +203,10 @@ void first_come_first_served() {
 	} //End while (num waiting processes > 0)
 } //End first_come_first_served function
 
+/**
+ * At a given time, the processor picks the shortest job
+ * in the ready queue and runs it to completion.
+ */
 void shortest_job_first() {
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
@@ -229,6 +232,12 @@ void shortest_job_first() {
 	} //End while num waiting processes > 0
 }
 
+/**
+ * The processor runs the shortest job in the ready queue.
+ * If a job is submitted that requires a smaller amount of time
+ * than the currently-running process needs to complete its work,
+ * the currently-running process is preempted (replaced).
+ */
 void pre_shortest_job_first() {
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
@@ -281,6 +290,11 @@ void pre_shortest_job_first() {
 	} //End while num waiting processes > 0	*/
 }
 
+/**
+ * The processor gives an equal amount of time to all jobs
+ * in the ready queue.
+ * This time slice is predetermined and constant.
+ */
 void round_robin() {
 	int current_proc_idx;
 	while(WAITING_PROCESSES > 0) {
@@ -291,6 +305,12 @@ void round_robin() {
 	}
 }
 
+/**
+ * The processor runs the highest-priority job in the ready queue.
+ * If a job is submitted that has a higher priority
+ * than the currently-running process has,
+ * the currently-running process is preempted (replaced).
+ */
 void pre_priority() {
 	//TODO
 }
