@@ -6,7 +6,7 @@ typedef struct {
   int start_time;  //Set to -1 initially
   int end_time; //Set to -1 initially
   int time_spent; //Amount of time spent so far
-  int status; //Constants define this one
+  int status; //JOB_* Constants define this one
 } Job;
 
 typedef struct {
