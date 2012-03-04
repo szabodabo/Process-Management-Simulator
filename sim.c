@@ -190,7 +190,6 @@ void first_come_first_served() {
 		}
 		//So now we've got the next one in line, but what if it's still in the future?
 		if (QUEUE[min_idx].submit_time > CURRENT_TIME) {
-			//CURRENT_TIME = QUEUE[min_idx].submit_time;
 			set_clock_to(QUEUE[min_idx].submit_time);
 		}
 
@@ -198,7 +197,6 @@ void first_come_first_served() {
 		process_start(current_proc_idx);
 	
 		//Increment the timer by the amt of time required to complete
-		//CURRENT_TIME += QUEUE[current_proc_idx].time_required;
 		increment_clock(QUEUE[current_proc_idx].time_required);
 
 		process_complete(current_proc_idx);
@@ -225,7 +223,6 @@ void shortest_job_first() {
 		process_context_switch(&current_proc_idx, min_job_idx);
 		process_start(current_proc_idx);
 
-		//CURRENT_TIME += QUEUE[current_proc_idx].time_required;
 		increment_clock(QUEUE[current_proc_idx].time_required);
 
 		process_complete(current_proc_idx);
@@ -275,13 +272,11 @@ void pre_shortest_job_first() {
 		int currentTimeRemaining = QUEUE[current_proc_idx].time_required - QUEUE[current_proc_idx].time_spent;
 		if (next_start_time > (CURRENT_TIME + currentTimeRemaining)) {
 			//We can finish this job!
-			//CURRENT_TIME += currentTimeRemaining;
 			increment_clock(currentTimeRemaining);
 			process_complete(current_proc_idx);
 		} else {
 			//We can't finish this job, so do as much as we can.
 			QUEUE[i].time_spent += (next_start_time - CURRENT_TIME);
-			//CURRENT_TIME = next_start_time;
 			set_clock_to(next_start_time);
 		}
 	} //End while num waiting processes > 0	*/
@@ -386,7 +381,6 @@ void process_context_switch(int *cur_idx, int new_idx) {
 		print_timestamp();
 		printf("Context switch (swapped out process %d for process %d)\n",
 			QUEUE[*cur_idx].pid, QUEUE[new_idx].pid);
-		//CURRENT_TIME += CONTEXT_SWITCH_PENALTY;
 		increment_clock(CONTEXT_SWITCH_PENALTY);
 	}
 	*cur_idx = new_idx;
