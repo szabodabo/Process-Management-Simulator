@@ -301,7 +301,6 @@ void pre_priority() {
  * amount: The amount by which we should increment the clock
  */
 void increment_clock(int amount) {
-	//TODO
 	//New jobs could be submitted during this increment...
 	//Increment up through job submissions
 	while (amount > 0) {
