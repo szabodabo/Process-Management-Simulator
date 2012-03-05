@@ -22,7 +22,7 @@
 /**
  * These settings control the behavior of the simulator.
  */
-int SCHEDULING_METHOD = FIRST_COME_FIRST_SERVED; //See above options
+int SCHEDULING_METHOD = PRE_SHORTEST_JOB_FIRST; //See above options
 int TOTAL_PROCESSES = 20; //This is the N value
 int PART = 1; //Part I or Part II
 int CONTEXT_SWITCH_PENALTY = 12; //This is "Tcs"

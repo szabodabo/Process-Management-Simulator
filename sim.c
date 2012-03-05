@@ -126,12 +126,6 @@ void run_cpu_sim() {
  * First-come, first-served.  Pretty simple.
  */
 void first_come_first_served() {
-
-	printf("=================================================================\n");
-	printf("==================== FIRST COME, FIRST SERVED ===================\n");
-	printf("=================================================================\n");
-	//Sometimes, this prints in the middle of the job submissions... that's bad.
-	
 	int current_proc_idx; //Index of current job object in queue (NOT PID)
 	while (WAITING_PROCESSES > 0) { //We've still got jobs to take care of
 		//Find a job to start
@@ -165,10 +159,6 @@ void first_come_first_served() {
  * in the ready queue and runs it to completion.
  */
 void shortest_job_first() {
-	printf("=================================================================\n");
-	printf("======================= SHORTEST JOB FIRST ======================\n");
-	printf("=================================================================\n");
-
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
 		//Find the shortest submitted job not yet started
@@ -255,13 +245,31 @@ void pre_shortest_job_first() {
  * The processor gives an equal amount of time to all jobs
  * in the ready queue.
  * This time slice is predetermined and constant.
+ * If you're "late" to the ready queue (as in, we start a new round and THEN you get submitted), we pass over you until next round
+ * This prevents jobs from just piling up in the queue and preventing jobs who were there already from being 'ignored', so to speak
  */
 void round_robin() {
 	int current_proc_idx;
 	while(WAITING_PROCESSES > 0) {
 		int i;
+		int theParty = CURRENT_TIME; //Life's a party!
 		for(i = 0; i < TOTAL_PROCESSES; i++) {
-
+			if (QUEUE[i].submit_time <= theParty //But hey, if you're late to the party, we understand. We'll get you on the next round!
+			    && QUEUE[i].status != JOB_COMPLETED) {
+				
+				process_context_switch(&current_proc_idx, i);
+				process_start(current_proc_idx);
+			
+				int currentTimeRemaining = QUEUE[current_proc_idx].time_required - QUEUE[current_proc_idx].time_spent;
+				if(currentTimeRemaining < ROUND_ROBIN_TIME_SLICE) //if you're going to be done partying after this round...
+				{
+					increment_clock(currentTimeRemaining);
+					process_complete(current_proc_idx);
+				} else {                                          //otherwise, do what you can and it's someone else's turn!
+					QUEUE[i].time_spent += ROUND_ROBIN_TIME_SLICE;
+					increment_clock(ROUND_ROBIN_TIME_SLICE);
+				}
+			}
 		}
 	}
 }
@@ -273,7 +281,40 @@ void round_robin() {
  * the currently-running process is preempted (replaced).
  */
 void pre_priority() {
-	//TODO
+	int current_proc_idx;
+	while(WAITING_PROCESSES > 0) {
+		int i;
+		int highest_priority = 5; //our maximum priority is 4
+		int highest_priority_idx;
+		for(i = 0; i < TOTAL_PROCESSES; i++) {
+			if(QUEUE[i].submit_time < CURRENT_TIME
+			&& QUEUE[i].status != JOB_COMPLETED
+			&& QUEUE[i].priority < highest_priority) {
+				highest_priority = QUEUE[i].priority;
+				highest_priority_idx = i;
+			}
+		}
+
+		process_context_switch(&current_proc_idx, highest_priority_idx);
+		process_start(current_proc_idx);
+
+		int next_start_time = INT_MAX;
+		for (i = 0; i < TOTAL_PROCESSES; i++) {
+			if (QUEUE[i].submit_time > CURRENT_TIME
+			    && QUEUE[i].priority < highest_priority) {
+				next_start_time = QUEUE[i].submit_time;
+			}
+		}
+
+		int currentTimeRemaining = QUEUE[current_proc_idx].time_required - QUEUE[current_proc_idx].time_spent;
+		if (next_start_time > (CURRENT_TIME + currentTimeRemaining)) {
+			increment_clock(currentTimeRemaining);
+			process_complete(current_proc_idx);
+		} else {
+			QUEUE[i].time_spent += (next_start_time - CURRENT_TIME);
+			set_clock_to(next_start_time);
+		}
+	}
 }
 
 /**
@@ -374,7 +415,6 @@ void process_context_switch(int *cur_idx, int new_idx) {
 void process_complete(int q_idx) {
 	QUEUE[q_idx].end_time = CURRENT_TIME;
 	QUEUE[q_idx].status = JOB_COMPLETED;
-	//The print statement is in process_stats.
 	WAITING_PROCESSES--;
 	process_stats(q_idx);
 }
@@ -387,7 +427,7 @@ void process_stats(int q_idx) {
 	JobStatCollection stats = get_stats(&QUEUE[q_idx]);
 	ALL_STATS[q_idx] = stats;
 	print_timestamp();
-	printf("Process %d completed its CPU burst ", QUEUE[q_idx].pid);
+	printf("Process %d terminated ", QUEUE[q_idx].pid);
 	printf("(turnaround time %dms, ", stats.turnaround_time);
 	printf("initial wait time %dms, ", stats.initial_wait_time);
 	printf("total wait time %dms)\n", stats.total_wait_time);
