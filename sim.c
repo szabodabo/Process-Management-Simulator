@@ -126,6 +126,12 @@ void run_cpu_sim() {
  * First-come, first-served.  Pretty simple.
  */
 void first_come_first_served() {
+
+	printf("=================================================================\n");
+	printf("==================== FIRST COME, FIRST SERVED ===================\n");
+	printf("=================================================================\n");
+	//Sometimes, this prints in the middle of the job submissions... that's bad.
+	
 	int current_proc_idx; //Index of current job object in queue (NOT PID)
 	while (WAITING_PROCESSES > 0) { //We've still got jobs to take care of
 		//Find a job to start
@@ -159,6 +165,10 @@ void first_come_first_served() {
  * in the ready queue and runs it to completion.
  */
 void shortest_job_first() {
+	printf("=================================================================\n");
+	printf("======================= SHORTEST JOB FIRST ======================\n");
+	printf("=================================================================\n");
+
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
 		//Find the shortest submitted job not yet started
