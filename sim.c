@@ -502,7 +502,7 @@ void process_stats(int q_idx) {
 	JobStatCollection stats = get_stats(&QUEUE[q_idx]);
 	ALL_STATS[q_idx] = stats;
 	print_timestamp();
-	printf("Process %d terminated ", QUEUE[q_idx].pid);
+	printf("Process %d completed its CPU burst ", QUEUE[q_idx].pid);
 	printf("(turnaround time %dms, ", stats.turnaround_time);
 	printf("initial wait time %dms, ", stats.initial_wait_time);
 	printf("total wait time %dms)\n", stats.total_wait_time);
