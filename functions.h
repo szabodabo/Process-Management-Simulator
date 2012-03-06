@@ -14,6 +14,7 @@ void run_cpu_sim();
 
 JobStatCollection get_stats(Job *);
 void print_all_stats();
+void print_banner();
 
 void process_submission(int);
 void process_start(int);

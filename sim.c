@@ -16,7 +16,7 @@
 //as well as their statistics
 Job *QUEUE;
 Job *TEMPLATE_QUEUE;
-JobStatCollection *ALL_STATS;
+JobStatCollection **ALL_STATS;
 
 //We'll also need some state variables for this simulation
 int CURRENT_TIME = 0; //Time to get a watch... heh. SIGH -nz
@@ -32,7 +32,11 @@ int main(int argc, char **argv) {
 	}
 	QUEUE = calloc(TOTAL_PROCESSES, sizeof(Job));
 	TEMPLATE_QUEUE = calloc(TOTAL_PROCESSES, sizeof(Job));
-	ALL_STATS = calloc(TOTAL_PROCESSES, sizeof(JobStatCollection));
+	ALL_STATS = calloc(5, sizeof(JobStatCollection *));
+	int i;
+	for (i = 0; i < 5; i++) {
+		ALL_STATS[i] = calloc(TOTAL_PROCESSES, sizeof(JobStatCollection));
+	}
 	populate_template_queue();
 	run_cpu_sim();
 	return EXIT_SUCCESS;
@@ -138,7 +142,6 @@ void populate_template_queue() {
  * This might be ugly, but that's life
  */
 void run_cpu_sim() {
-	reset_simulator();
 	if (SCHEDULING_METHOD == FIRST_COME_FIRST_SERVED) {
 		first_come_first_served();
 		print_all_stats();
@@ -155,29 +158,17 @@ void run_cpu_sim() {
 		pre_priority();
 		print_all_stats();
 	}	else if (SCHEDULING_METHOD == ALL) {
-		printf("FCFS\n");
 		first_come_first_served();
-		print_all_stats();
-		
-		printf("SJF\n");
-		reset_simulator();
 		shortest_job_first();
-		print_all_stats();
-		
-		printf("PSJF\n");
-		reset_simulator();
 		pre_shortest_job_first();
-		print_all_stats();
-		
-		printf("RR\n");
-		reset_simulator();
 		round_robin();
-		print_all_stats();
-		
-		printf("PP\n");
-		reset_simulator();
 		pre_priority();
-		print_all_stats();
+
+		int i;
+		for (i = 0; i < 5; i++) {
+			SCHEDULING_METHOD = i;
+			print_all_stats();
+		}
 	} else {
  		fprintf(stderr, "Invalid Scheduling Algorithm\n");
 	}
@@ -187,6 +178,10 @@ void run_cpu_sim() {
  * First-come, first-served.  Pretty simple.
  */
 void first_come_first_served() {
+	SCHEDULING_METHOD = FIRST_COME_FIRST_SERVED;
+	print_banner();
+	reset_simulator();
+
 	int current_proc_idx; //Index of current job object in queue (NOT PID)
 	while (WAITING_PROCESSES > 0) { //We've still got jobs to take care of
 		//Find a job to start
@@ -220,6 +215,10 @@ void first_come_first_served() {
  * in the ready queue and runs it to completion.
  */
 void shortest_job_first() {
+	SCHEDULING_METHOD = SHORTEST_JOB_FIRST;
+	print_banner();
+	reset_simulator();
+
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
 		//Find the shortest submitted job not yet started
@@ -251,6 +250,11 @@ void shortest_job_first() {
  * the currently-running process is preempted (replaced).
  */
 void pre_shortest_job_first() {
+	SCHEDULING_METHOD = PRE_SHORTEST_JOB_FIRST;
+	print_banner();
+	reset_simulator();
+
+
 	int current_proc_idx;
 	while (WAITING_PROCESSES > 0) {
 		//We're at time T, and we're looking for a process to do work on.
@@ -310,6 +314,10 @@ void pre_shortest_job_first() {
  * This prevents jobs from just piling up in the queue and preventing jobs who were there already from being 'ignored', so to speak
  */
 void round_robin() {
+	SCHEDULING_METHOD = ROUND_ROBIN;
+	print_banner();
+	reset_simulator();
+
 	int current_proc_idx;
 	while(WAITING_PROCESSES > 0) {
 		int i;
@@ -342,6 +350,10 @@ void round_robin() {
  * the currently-running process is preempted (replaced).
  */
 void pre_priority() {
+	SCHEDULING_METHOD = PRE_PRIORITY;
+	print_banner();
+	reset_simulator();
+
 	int current_proc_idx;
 	while(WAITING_PROCESSES > 0) {
 		int i;
@@ -445,7 +457,7 @@ void process_start(int q_idx) {
 		return;
 	}
 	print_timestamp();
-	printf("Process %d accessed CPU for the first time", QUEUE[q_idx].pid);
+	printf("Process %2d accessed CPU for the first time", QUEUE[q_idx].pid);
 	printf(" (initial wait time %dms)\n", CURRENT_TIME - QUEUE[q_idx].submit_time);
 	QUEUE[q_idx].start_time = CURRENT_TIME;
 	QUEUE[q_idx].status = JOB_IN_PROGRESS;
@@ -493,15 +505,33 @@ void process_complete(int q_idx) {
  */
 void process_stats(int q_idx) {
 	JobStatCollection stats = get_stats(&QUEUE[q_idx]);
-	ALL_STATS[q_idx] = stats;
+	ALL_STATS[SCHEDULING_METHOD][q_idx] = stats;
 	print_timestamp();
-	printf("Process %d completed its CPU burst ", QUEUE[q_idx].pid);
+	printf("Process %2d completed its CPU burst ", QUEUE[q_idx].pid);
 	printf("(turnaround time %dms, ", stats.turnaround_time);
 	printf("initial wait time %dms, ", stats.initial_wait_time);
 	printf("total wait time %dms)\n", stats.total_wait_time);
 }
 
-
+/**
+ * Print a pretty banner for the current algo so that we know what's going on
+ */
+void print_banner() {
+	printf("==========================================================\n");
+	if (SCHEDULING_METHOD == FIRST_COME_FIRST_SERVED) {
+		printf("================= FIRST COME FIRST SERVED ================\n");
+	} else if (SCHEDULING_METHOD == SHORTEST_JOB_FIRST) {
+		printf("================= SHORTEST JOB FIRST =====================\n");
+	} else if (SCHEDULING_METHOD == PRE_SHORTEST_JOB_FIRST) {	
+		printf("============= PREEMPTIVE SHORTEST JOB FIRST ==============\n");
+	} else if (SCHEDULING_METHOD == ROUND_ROBIN) {
+		printf("===================== ROUND ROBIN ========================\n");
+	} else if (SCHEDULING_METHOD == PRE_PRIORITY) {
+		printf("===================== PREEMPTIVE PRIORITY ================\n");
+	}
+	printf("==========================================================\n");
+}
+	
 
 JobStatCollection get_stats(Job *job) {
 	JobStatCollection stats;
@@ -516,24 +546,26 @@ JobStatCollection get_stats(Job *job) {
 }
 
 void print_all_stats() {
-	int min_turnaround = ALL_STATS[0].turnaround_time;
-	int max_turnaround = ALL_STATS[0].turnaround_time;
+	print_banner();
+
+	int min_turnaround = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
+	int max_turnaround = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
 	int sum_turnaround = 0;
 	double avg_turnaround = 0;
 
-	int min_initial_wait = ALL_STATS[0].turnaround_time;
-	int max_initial_wait = ALL_STATS[0].turnaround_time;
+	int min_initial_wait = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
+	int max_initial_wait = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
 	int sum_initial_wait = 0;
 	double avg_initial_wait = 0;
 
-	int min_total_wait = ALL_STATS[0].turnaround_time;
-	int max_total_wait = ALL_STATS[0].turnaround_time;
+	int min_total_wait = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
+	int max_total_wait = ALL_STATS[SCHEDULING_METHOD][0].turnaround_time;
 	int sum_total_wait = 0;
 	double avg_total_wait = 0;
 
 	int i;
 	for (i = 0; i < TOTAL_PROCESSES; i++) {
-		JobStatCollection cur = ALL_STATS[i];
+		JobStatCollection cur = ALL_STATS[SCHEDULING_METHOD][i];
 		//Turnaround time
 		if (cur.turnaround_time < min_turnaround) { 
 			min_turnaround = cur.turnaround_time; 

@@ -3,12 +3,12 @@
  * the simulator will emulate.
  * This option is set with the SCHEDULING_METHOD variable.
  */
-#define FIRST_COME_FIRST_SERVED 1
-#define SHORTEST_JOB_FIRST 2
-#define PRE_SHORTEST_JOB_FIRST 3
-#define ROUND_ROBIN 4
-#define PRE_PRIORITY 5
-#define ALL 6
+#define FIRST_COME_FIRST_SERVED 0
+#define SHORTEST_JOB_FIRST 1
+#define PRE_SHORTEST_JOB_FIRST 2
+#define ROUND_ROBIN 3
+#define PRE_PRIORITY 4
+#define ALL 5
 
 /**
  * Just some helpful status constants
