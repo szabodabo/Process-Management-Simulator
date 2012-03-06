@@ -34,12 +34,7 @@ int main(int argc, char **argv) {
 	TEMPLATE_QUEUE = calloc(TOTAL_PROCESSES, sizeof(Job));
 	ALL_STATS = calloc(TOTAL_PROCESSES, sizeof(JobStatCollection));
 	populate_template_queue();
-	reset_simulator();
 	run_cpu_sim();
-	print_all_stats();
-	reset_simulator();
-	run_cpu_sim();
-	print_all_stats();
 	return EXIT_SUCCESS;
 }
 
@@ -73,6 +68,22 @@ void print_timestamp() {
  */
 int random_time_amt() {
 	return (((double) rand() / (double) RAND_MAX) * 7000) + 500;
+}
+
+/**
+ * Give me a random priority (integer [1, 4])
+ */
+int random_priority() {
+	int myRand = 5;
+	while (myRand == 5) {
+		myRand = (((double) rand() / (double) RAND_MAX) * 4) + 1;
+	}
+	//We'll only get 5 with a chance of 1/RAND_MAX... 
+	// but we like to consider the edge cases.
+
+	//SOMETIMES WE LIKE TO PLAY CHANCE GAMES
+	//Get out, Noah
+	return myRand;
 }
 
 /**
@@ -116,26 +127,52 @@ void populate_template_queue() {
 
 		//Make a new job object and throw it into the queue
 		//  pid's start at 1 in goldschmidt's example... hence the i+1
-		Job new_job = {i+1, job_length, 0, submit_time, -1, -1, 0, JOB_NOT_STARTED};
+		Job new_job = {i+1, job_length, random_priority(), submit_time, -1, -1, 0, JOB_NOT_STARTED};
 		TEMPLATE_QUEUE[i] = new_job;
 	}
 }
 
 /**
  * Start the correct CPU scheduling algorithm's function
+ * This might be ugly, but that's life
  */
 void run_cpu_sim() {
+	reset_simulator();
 	if (SCHEDULING_METHOD == FIRST_COME_FIRST_SERVED) {
 		first_come_first_served();
+		print_all_stats();
 	} else if (SCHEDULING_METHOD == SHORTEST_JOB_FIRST) {
 		shortest_job_first();
+		print_all_stats();
 	} else if (SCHEDULING_METHOD == PRE_SHORTEST_JOB_FIRST) {
 		pre_shortest_job_first();
+		print_all_stats();
 	} else if (SCHEDULING_METHOD == ROUND_ROBIN) {
 		round_robin();
+		print_all_stats();
 	} else if (SCHEDULING_METHOD == PRE_PRIORITY) {
 		pre_priority();
-	}	else {
+		print_all_stats();
+	}	else if (SCHEDULING_METHOD == ALL) {
+		first_come_first_served();
+		print_all_stats();
+		
+		reset_simulator();
+		shortest_job_first();
+		print_all_stats();
+		
+		reset_simulator();
+		pre_shortest_job_first();
+		print_all_stats();
+		
+		reset_simulator();
+		round_robin();
+		print_all_stats();
+		
+		reset_simulator();
+		pre_priority();
+		print_all_stats();
+	} else {
  		fprintf(stderr, "Invalid Scheduling Algorithm\n");
 	}
 }
@@ -302,15 +339,15 @@ void pre_priority() {
 	int current_proc_idx;
 	while(WAITING_PROCESSES > 0) {
 		int i;
-		int highest_priority = 5; //our maximum priority is 4
+		int highest_priority = INT_MAX;
 		int highest_priority_idx;
 		for(i = 0; i < TOTAL_PROCESSES; i++) {
-			if(QUEUE[i].submit_time < CURRENT_TIME
+			if(QUEUE[i].submit_time <= CURRENT_TIME
 			&& QUEUE[i].status != JOB_COMPLETED
 			&& QUEUE[i].priority < highest_priority) {
 				highest_priority = QUEUE[i].priority;
 				highest_priority_idx = i;
-			} else if (QUEUE[i].submit_time < CURRENT_TIME
+			} else if (QUEUE[i].submit_time <= CURRENT_TIME
 			           && QUEUE[i].status != JOB_COMPLETED
 								 && QUEUE[i].priority == highest_priority
 								 && QUEUE[i].submit_time < QUEUE[highest_priority_idx].submit_time) {
@@ -387,8 +424,8 @@ void set_clock_to(int to_time) {
  */
 void process_submission(int q_idx) {
 	print_timestamp();
-	printf("Process %2d created (requires %dms CPU time)\n", 
-	  QUEUE[q_idx].pid, QUEUE[q_idx].time_required );
+	printf("Process %2d created (requires %4dms CPU time, priority %d)\n", 
+	  QUEUE[q_idx].pid, QUEUE[q_idx].time_required, QUEUE[q_idx].priority );
 }
 
 /**
