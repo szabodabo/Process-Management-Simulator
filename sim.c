@@ -155,21 +155,26 @@ void run_cpu_sim() {
 		pre_priority();
 		print_all_stats();
 	}	else if (SCHEDULING_METHOD == ALL) {
+		printf("FCFS\n");
 		first_come_first_served();
 		print_all_stats();
 		
+		printf("SJF\n");
 		reset_simulator();
 		shortest_job_first();
 		print_all_stats();
 		
+		printf("PSJF\n");
 		reset_simulator();
 		pre_shortest_job_first();
 		print_all_stats();
 		
+		printf("RR\n");
 		reset_simulator();
 		round_robin();
 		print_all_stats();
 		
+		printf("PP\n");
 		reset_simulator();
 		pre_priority();
 		print_all_stats();
@@ -291,7 +296,7 @@ void pre_shortest_job_first() {
 			process_complete(current_proc_idx);
 		} else {
 			//We can't finish this job, so do as much as we can.
-			QUEUE[i].time_spent += (next_start_time - CURRENT_TIME);
+			QUEUE[current_proc_idx].time_spent += (next_start_time - CURRENT_TIME);
 			set_clock_to(next_start_time);
 		}
 	} //End while num waiting processes > 0	*/
@@ -322,7 +327,7 @@ void round_robin() {
 					increment_clock(currentTimeRemaining);
 					process_complete(current_proc_idx);
 				} else {                                          //otherwise, do what you can and it's someone else's turn!
-					QUEUE[i].time_spent += ROUND_ROBIN_TIME_SLICE;
+					QUEUE[current_proc_idx].time_spent += ROUND_ROBIN_TIME_SLICE;
 					increment_clock(ROUND_ROBIN_TIME_SLICE);
 				} 
 			}
@@ -372,7 +377,7 @@ void pre_priority() {
 			increment_clock(currentTimeRemaining);
 			process_complete(current_proc_idx);
 		} else {
-			QUEUE[i].time_spent += (next_start_time - CURRENT_TIME);
+			QUEUE[current_proc_idx].time_spent += (next_start_time - CURRENT_TIME);
 			set_clock_to(next_start_time);
 		}
 	}
@@ -386,7 +391,11 @@ void pre_priority() {
 void increment_clock(int amount) {
 	//New jobs could be submitted during this increment...
 	//Increment up through job submissions
+
+	printf("Incrementing clock by %dms\n", amount);
+
 	while (amount > 0) {
+		printf("Amount is now %d\n", amount);
 		int min_submit_time = INT_MAX; int min_submit_idx = 0;
 		int i;
 		for (i = 0; i < TOTAL_PROCESSES; i++) {
@@ -396,18 +405,23 @@ void increment_clock(int amount) {
 				min_submit_idx = i;
 			}
 		}
+		printf("Min Submit Time is %d\n", min_submit_time);
+
 		if (min_submit_time - CURRENT_TIME <= amount) {
+			printf("We're trying to increment the clock past a job submission time.\n");
 			//We want to increment the clock past the next submit
 			amount -= min_submit_time - CURRENT_TIME;
 			CURRENT_TIME = min_submit_time;
 			process_submission(min_submit_idx);
 		} else {
+			printf("We can increment the clock without worrying.\n");
 			//amount < min_submit_time - CURRENT_TIME
 			//We can increment the clock without worrying about the next submission
 			CURRENT_TIME += amount;
 			amount = 0;
 		}
 	}
+	printf("Done incrementing clock\n");
 }
 
 /**
