@@ -8,7 +8,8 @@ void print_timestamp();
 int random_time_amt();
 int expo_random();
 
-void populate_queue();
+void populate_template_queue();
+void reset_simulator();
 void run_cpu_sim();
 
 JobStatCollection get_stats(Job *);

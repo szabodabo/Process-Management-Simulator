@@ -15,6 +15,7 @@
 //We'll need to keep track of the jobs in the queue
 //as well as their statistics
 Job *QUEUE;
+Job *TEMPLATE_QUEUE;
 JobStatCollection *ALL_STATS;
 
 //We'll also need some state variables for this simulation
@@ -30,11 +31,34 @@ int main(int argc, char **argv) {
 		PART = 2;
 	}
 	QUEUE = calloc(TOTAL_PROCESSES, sizeof(Job));
+	TEMPLATE_QUEUE = calloc(TOTAL_PROCESSES, sizeof(Job));
 	ALL_STATS = calloc(TOTAL_PROCESSES, sizeof(JobStatCollection));
-	populate_queue();
+	populate_template_queue();
+	reset_simulator();
+	run_cpu_sim();
+	print_all_stats();
+	reset_simulator();
 	run_cpu_sim();
 	print_all_stats();
 	return EXIT_SUCCESS;
+}
+
+/**
+ * Copy the template queue into the working queue
+ */
+void reset_simulator() {
+	memcpy(QUEUE, TEMPLATE_QUEUE, TOTAL_PROCESSES * sizeof(Job));
+	CURRENT_TIME = 0;
+	WAITING_PROCESSES = TOTAL_PROCESSES;
+	PERFORMED_CONTEXT_SWITCH = NO;
+
+	int i;
+	for (i = 0; i < TOTAL_PROCESSES; i++) {
+		//Print submission notices for the jobs submitted at time 0ms
+		if (QUEUE[i].submit_time == 0) {
+			process_submission(i);
+		}	
+	}
 }
 
 /**
@@ -75,11 +99,11 @@ int expo_random() {
 }
 
 /**
- * Populate the job queue with actual jobs...
+ * Populate the template queue with actual jobs...
  * Part I: All jobs start at time=0
  * Part II: Some jobs start at random time
  */
-void populate_queue() {
+void populate_template_queue() {
 	int i;
 	srand(time(NULL));
 	for (i = 0; i < TOTAL_PROCESSES; i++) {
@@ -93,13 +117,7 @@ void populate_queue() {
 		//Make a new job object and throw it into the queue
 		//  pid's start at 1 in goldschmidt's example... hence the i+1
 		Job new_job = {i+1, job_length, 0, submit_time, -1, -1, 0, JOB_NOT_STARTED};
-		QUEUE[i] = new_job;
-		WAITING_PROCESSES++;
-
-		//Print submission notices for the jobs submitted at time 0ms
-		if (submit_time == 0) {
-			process_submission(i);
-		}		
+		TEMPLATE_QUEUE[i] = new_job;
 	}
 }
 
