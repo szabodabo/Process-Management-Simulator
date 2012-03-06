@@ -292,9 +292,12 @@ void pre_priority() {
 			&& QUEUE[i].priority < highest_priority) {
 				highest_priority = QUEUE[i].priority;
 				highest_priority_idx = i;
+			} else if (QUEUE[i].submit_time < CURRENT_TIME
+			           && QUEUE[i].status != JOB_COMPLETED
+								 && QUEUE[i].priority == highest_priority
+								 && QUEUE[i].submit_time < QUEUE[highest_priority_idx].submit_time) {
+				highest_priority_idx = i;
 			}
-			//TODO: But this should default to FCFS is priorities are equal...
-			//so we'll need a tie-condition check in here to prefer jobs submitted earlier
 		}
 
 		process_context_switch(&current_proc_idx, highest_priority_idx);
@@ -305,9 +308,6 @@ void pre_priority() {
 			if (QUEUE[i].submit_time > CURRENT_TIME
 			    && QUEUE[i].priority < highest_priority) {
 				next_start_time = QUEUE[i].submit_time;
-				//This should find the very next job that starts... it should have
-				// nothing to do with the priority of that job...
-				//TODO: take a look at this
 			}
 		}
 
