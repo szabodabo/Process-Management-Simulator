@@ -116,7 +116,8 @@ int expo_random() {
  */
 void populate_template_queue() {
 	int i;
-	srand(time(NULL));
+	//srand(time(NULL));
+	srand(1);
 	for (i = 0; i < TOTAL_PROCESSES; i++) {
 		//Give me a random number between 500 and 7500
 		int job_length = random_time_amt();
