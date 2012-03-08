@@ -120,8 +120,11 @@ int expo_random() {
  */
 void populate_template_queue() {
 	int i;
-	//srand(time(NULL));
-	srand(1);
+	if (RANDOMIZE == YES) {
+		srand(time(NULL));
+	} else {
+		srand(1);
+	}
 	for (i = 0; i < TOTAL_PROCESSES; i++) {
 		//Give me a random number between 500 and 7500
 		int job_length = random_time_amt();
@@ -532,19 +535,21 @@ void print_banner() {
 	printf("==========================================================\n");
 }
 	
-
+/**
+ * Look at a process that completed and get some statistics from it
+ * job: The job that finished
+ */
 JobStatCollection get_stats(Job *job) {
 	JobStatCollection stats;
 	stats.turnaround_time = job->end_time - job->submit_time;
 	stats.initial_wait_time = job->start_time - job->submit_time;
 	stats.total_wait_time = stats.turnaround_time - job->time_required;
-	//printf("Job PID %d:\n", job->pid);
-	//printf("  Submit Time: %dms\n", job->submit_time);
-	//printf("  Start Time: %dms\n", job->start_time);
-	//printf("  End Time: %dms\n", job->end_time);
 	return stats;
 }
 
+/**
+ * Print all stats that are in the queue for the currently selected scheduling method
+ */
 void print_all_stats() {
 	print_banner();
 

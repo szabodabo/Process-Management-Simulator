@@ -28,3 +28,4 @@ int TOTAL_PROCESSES = 20; //This is the N value
 int PART = 1; //Part I or Part II
 int CONTEXT_SWITCH_PENALTY = 12; //This is "Tcs"
 int ROUND_ROBIN_TIME_SLICE = 100; //Fairly (ha) self-explanatory
+int RANDOMIZE = YES; //Change to 'NO' if we're using a constant seed (and not current time)
