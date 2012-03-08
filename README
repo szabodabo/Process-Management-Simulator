@@ -1,0 +1,24 @@
+NAMES:       Dakota Szabo (660839222), Noah Zimmt (660895266)
+
+PROJECT #1:  Process Management Simulation System
+
+DATE:        7 March 2012
+
+sim.c:       Main code for simulator
+functions.h: Headers for functions used in simulator
+structs.h:   Definition of structs used in simulator
+constants.h: Definition of constants used by the simulator
+README:      See README
+
+===================================================================
+================ TO MODIFY SIMULATION PARAMETERS ==================
+===================================================================
+|                                                                 |
+|  Change appropriately commented/labeled values in constants.h.  |
+|	                                                                |
+|	   For variable process submission times (Part II), run the     |
+|	               executable with the -PART2 flag.                 |
+|                                                                 |
+===================================================================
+===================================================================
+===================================================================
