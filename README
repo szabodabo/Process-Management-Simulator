@@ -15,9 +15,9 @@ README:      See README
 ===================================================================
 |                                                                 |
 |  Change appropriately commented/labeled values in constants.h.  |
-|	                                                                |
-|	   For variable process submission times (Part II), run the     |
-|	               executable with the -PART2 flag.                 |
+|                                                                 |
+|    For variable process submission times (Part II), run the     |
+|                executable with the -PART2 flag.                 |
 |                                                                 |
 ===================================================================
 ===================================================================
